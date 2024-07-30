@@ -28,7 +28,6 @@ class Main:
             self.students_data = self.read_ods(data_path)
         except ImportError as e:
             print(f"Erro ao importar dependência: {e}")
-            print("Instale a dependência faltante com: pip install odfpy")
             raise
 
     def read_ods(self, file_path):
@@ -38,7 +37,6 @@ class Main:
             from odf.text import P
         except ImportError as e:
             print(f"Erro ao importar dependência: {e}")
-            print("Instale a dependência faltante com: pip install odfpy")
             raise
 
         doc = load(file_path)
