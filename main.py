@@ -5,6 +5,28 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+
+class CustomMLPRegressor(MLPRegressor):
+    def __init__(self, hidden_layer_sizes=(100,), activation='relu', solver='adam',
+                 alpha=0.0001, batch_size='auto', learning_rate='constant', 
+                 learning_rate_init=0.001, power_t=0.5, max_iter=200, 
+                 shuffle=True, random_state=None, tol=0.0001, verbose=False, 
+                 warm_start=False, momentum=0.9, nesterovs_momentum=True, 
+                 early_stopping=False, validation_fraction=0.1, 
+                 beta_1=0.9, beta_2=0.999, epsilon=1e-08):
+        super().__init__(hidden_layer_sizes=hidden_layer_sizes, activation=activation, solver=solver,
+                         alpha=alpha, batch_size=batch_size, learning_rate=learning_rate,
+                         learning_rate_init=learning_rate_init, power_t=power_t, max_iter=max_iter,
+                         shuffle=shuffle, random_state=random_state, tol=tol, verbose=verbose,
+                         warm_start=warm_start, momentum=momentum, nesterovs_momentum=nesterovs_momentum,
+                         early_stopping=early_stopping, validation_fraction=validation_fraction,
+                         beta_1=beta_1, beta_2=beta_2, epsilon=epsilon)
+        self.train_errors_ = []
+
+    def _fit(self, X, y, incremental=False):
+        super()._fit(X, y, incremental)
+        self.train_errors_ = self.loss_curve_
 
 class Main:
     def __init__(self):
@@ -83,7 +105,15 @@ class Main:
         X_test_scaled = self.scaler.transform(X_test)
 
         # Configurar e treinar o modelo
-        self.model = MLPRegressor(hidden_layer_sizes=(3,), activation='relu', solver='adam', max_iter=1000, learning_rate_init=0.01, verbose=True, random_state=1)
+        self.model = CustomMLPRegressor(
+            hidden_layer_sizes=(3,), 
+            activation='relu', 
+            solver='adam', 
+            max_iter=1000, 
+            learning_rate_init=0.01, 
+            verbose=True, 
+            random_state=1
+        )
         self.model.fit(X_train_scaled, y_train)
 
         # Fazer previsões e calcular o erro quadrático médio
@@ -95,6 +125,14 @@ class Main:
         print(f"Bias da camada oculta: {self.model.intercepts_}")
         print(f"Pesos da camada de saída: {self.model.coefs_[-1]}")
         print(f"Bias da camada de saída: {self.model.intercepts_[-1]}")
+
+        # Plotar o erro quadrático médio em função das épocas
+        plt.plot(self.model.train_errors_)
+        plt.xlabel('Épocas')
+        plt.ylabel('Erro Quadrático Médio')
+        plt.title('Erro Quadrático Médio em Função das Épocas')
+        plt.grid(True)
+        plt.show()
 
     def predict(self):
         if self.model is None:
